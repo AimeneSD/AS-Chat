@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { SocketProvider } from '../contexts/SocketContext';
 import { friendService, userService } from '../services/api';
 import Sidebar from '../components/chat/Sidebar';

@@ -2,9 +2,8 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { authService } from '../services/api';
 import { connectSocket, disconnectSocket } from '../socket/socket';
 
-// ─── Création du Context ──────────────────────────────────────────────────────
-// On crée "la boîte" qui contiendra l'état global d'authentification.
-const AuthContext = createContext(null);
+// ─── Export du Context (utilisé par le hook) ──────────────────────────────────
+export const AuthContext = createContext(null);
 
 // ─── Clés de stockage localStorage ───────────────────────────────────────────
 const TOKEN_KEY = 'as_chat_token';
@@ -83,14 +82,4 @@ export function AuthProvider({ children }) {
             {children}
         </AuthContext.Provider>
     );
-}
-
-// ─── Hook personnalisé ────────────────────────────────────────────────────────
-// Au lieu d'écrire useContext(AuthContext) partout, on écrit juste useAuth().
-export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth doit être utilisé à l\'intérieur d\'un <AuthProvider>');
-    }
-    return context;
 }
