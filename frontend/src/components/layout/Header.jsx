@@ -1,8 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
 import MachaButton from '../ui/MachaButton';
+import { useAuth } from '../../hooks/useAuth';
 
 function Header() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) return null;
 
   return (
     <header className="absolute top-0 left-0 w-full z-50">
