@@ -8,12 +8,11 @@ import ChatWindow from '../components/chat/ChatWindow';
 function Chat() {
   const { user, logout } = useAuth();
 
-  const [friends, setFriends]               = useState([]);
-  const [selectedFriend, setSelectedFriend] = useState(null);
-  // 'conversations' | 'friends'
-  const [sidebarMode, setSidebarMode]       = useState('conversations');
-  // Filtre local (ne fait pas d'appel API)
-  const [searchQuery, setSearchQuery]       = useState('');
+  const [friends, setFriends]                   = useState([]);
+  const [pendingRequests, setPendingRequests]   = useState([]);
+  const [selectedFriend, setSelectedFriend]     = useState(null);
+  const [sidebarMode, setSidebarMode]           = useState('conversations');
+  const [searchQuery, setSearchQuery]           = useState('');
 
   const loadFriends = useCallback(async () => {
     try {
@@ -24,11 +23,26 @@ function Chat() {
     }
   }, []);
 
+  const loadPending = useCallback(async () => {
+    try {
+      const { data } = await friendService.getPending();
+      setPendingRequests(data);
+    } catch (err) {
+      console.error('Erreur chargement demandes :', err);
+    }
+  }, []);
+
+  // Recharge amis + demandes en attente
+  const refreshAll = useCallback(() => {
+    loadFriends();
+    loadPending();
+  }, [loadFriends, loadPending]);
+
   useEffect(() => {
     loadFriends();
-  }, [loadFriends]);
+    loadPending();
+  }, [loadFriends, loadPending]);
 
-  // Mise à jour du statut online/offline en temps réel
   const handleFriendStatusChange = useCallback((userId, newStatus) => {
     setFriends((prev) =>
       prev.map((f) => f.id === userId ? { ...f, status: newStatus } : f)
@@ -38,7 +52,6 @@ function Chat() {
     );
   }, []);
 
-  // Filtre local — recherche dans les amis existants uniquement
   const filteredFriends = friends.filter((f) =>
     f.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -53,7 +66,7 @@ function Chat() {
         <Sidebar
           user={user}
           friends={filteredFriends}
-          allFriends={friends}
+          pendingRequests={pendingRequests}
           selectedFriend={selectedFriend}
           onSelectFriend={(friend) => {
             setSelectedFriend(friend);
@@ -64,13 +77,13 @@ function Chat() {
           sidebarMode={sidebarMode}
           onSidebarModeChange={setSidebarMode}
           onLogout={logout}
-          onFriendAdded={loadFriends}
+          onFriendAdded={refreshAll}
         />
 
         <ChatWindow
           currentUser={user}
           friend={selectedFriend}
-          onFriendAdded={loadFriends}
+          onFriendAdded={refreshAll}
         />
       </div>
     </SocketProvider>

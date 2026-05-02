@@ -100,9 +100,15 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
     try {
       await friendService.sendRequest(targetUser.id);
       setAddedIds((prev) => new Set([...prev, targetUser.id]));
-      onFriendAdded?.(); // Refresh la liste d'amis dans le parent
+      onFriendAdded?.();
     } catch (err) {
-      console.error('Erreur ajout :', err.response?.data?.error);
+      const errorMsg = err.response?.data?.error;
+      console.error('Erreur ajout :', errorMsg);
+      
+      // Si la demande est déjà en attente, on marque visuellement comme "ajouté"
+      if (err.response?.status === 409) {
+        setAddedIds((prev) => new Set([...prev, targetUser.id]));
+      }
     } finally {
       setAddingId(null);
     }
