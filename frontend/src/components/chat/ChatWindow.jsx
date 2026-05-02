@@ -1,22 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
-import { messageService } from '../../services/api';
+import { messageService, userService, friendService } from '../../services/api';
 import { getSocket } from '../../socket/socket';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 
 /**
- * ChatWindow — Phase 3.
- * Ajouts : coches bleues (message lu), statut live depuis les props.
+ * ChatWindow — Phase 3 UX refactor.
+ *
+ * L'empty state est maintenant une zone d'action :
+ * on peut chercher un utilisateur par pseudo et lui envoyer une demande d'ami.
  */
-function ChatWindow({ currentUser, friend }) {
-  const [messages, setMessages]             = useState([]);
-  const [isTyping, setIsTyping]             = useState(false);
-  const [loadingMsgs, setLoadingMsgs]       = useState(false);
-  // Map : { [messageId]: true } — messages confirmés comme lus
-  const [readReceipts, setReadReceipts]     = useState({});
-  const typingTimeoutRef                    = useRef(null);
+function ChatWindow({ currentUser, friend, onFriendAdded }) {
+  const [messages, setMessages]         = useState([]);
+  const [isTyping, setIsTyping]         = useState(false);
+  const [loadingMsgs, setLoadingMsgs]   = useState(false);
+  const [readReceipts, setReadReceipts] = useState({});
 
-  // Chargement de l'historique quand on change de conversation
+  // ── État de la recherche d'utilisateur (empty state) ───────────────────
+  const [searchQuery, setSearchQuery]     = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching]     = useState(false);
+  const [addingId, setAddingId]           = useState(null);
+  const [addedIds, setAddedIds]           = useState(new Set());
+
+  const typingTimeoutRef = useRef(null);
+
+  // Chargement de l'historique
   useEffect(() => {
     if (!friend) return;
     const load = async () => {
@@ -35,62 +44,76 @@ function ChatWindow({ currentUser, friend }) {
     load();
   }, [friend?.id]);
 
-  // Écoute des événements Socket.io pour cette conversation
+  // Socket listeners
   useEffect(() => {
     const socket = getSocket();
     if (!socket || !friend) return;
 
-    // ── Nouveau message reçu ─────────────────────────────────────
     const onReceive = (msg) => {
       if (msg.sender_id === friend.id || msg.receiver_id === friend.id) {
         setMessages((prev) => [...prev, msg]);
-        // Marquer comme lu immédiatement puisque la fenêtre est ouverte
         socket.emit('message:read', { senderId: friend.id });
       }
     };
-
-    // ── Le destinataire a lu nos messages → coches bleues ───────
-    // "readBy" = l'ID de l'ami qui vient de lire
     const onRead = ({ readBy }) => {
-      if (readBy === friend.id) {
-        // On marque TOUS les messages envoyés à cet ami comme lus
-        setReadReceipts(() => {
-          const updated = {};
-          // On récupère l'état actuel depuis la closure — simple approche fonctionnelle
-          return { all: true }; // Signal "tous lus"
-        });
-      }
+      if (readBy === friend.id) setReadReceipts({ all: true });
     };
-
-    // ── Indicateur de frappe ─────────────────────────────────────
     const onTyping     = ({ senderId }) => { if (senderId === friend.id) setIsTyping(true); };
     const onStopTyping = ({ senderId }) => { if (senderId === friend.id) setIsTyping(false); };
 
-    socket.on('message:receive',   onReceive);
-    socket.on('message:read',      onRead);
-    socket.on('message:typing',    onTyping);
+    socket.on('message:receive',    onReceive);
+    socket.on('message:read',       onRead);
+    socket.on('message:typing',     onTyping);
     socket.on('message:stopTyping', onStopTyping);
-
-    // On marque les messages de l'ami comme lus à l'ouverture
     socket.emit('message:read', { senderId: friend.id });
 
     return () => {
-      socket.off('message:receive',   onReceive);
-      socket.off('message:read',      onRead);
-      socket.off('message:typing',    onTyping);
+      socket.off('message:receive',    onReceive);
+      socket.off('message:read',       onRead);
+      socket.off('message:typing',     onTyping);
       socket.off('message:stopTyping', onStopTyping);
     };
   }, [friend?.id]);
 
-  // Envoi d'un message
+  // Debounce de la recherche d'utilisateurs
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    const t = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const { data } = await userService.search(searchQuery.trim());
+        setSearchResults(data);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  const handleAddFriend = async (targetUser) => {
+    setAddingId(targetUser.id);
+    try {
+      await friendService.sendRequest(targetUser.id);
+      setAddedIds((prev) => new Set([...prev, targetUser.id]));
+      onFriendAdded?.(); // Refresh la liste d'amis dans le parent
+    } catch (err) {
+      console.error('Erreur ajout :', err.response?.data?.error);
+    } finally {
+      setAddingId(null);
+    }
+  };
+
   const handleSend = (content) => {
     const socket = getSocket();
     if (!socket || !content.trim()) return;
-
     socket.emit('message:send', { receiverId: friend.id, content }, ({ success, message, error }) => {
       if (success) {
         setMessages((prev) => [...prev, message]);
-        // Réinitialiser le signal "tous lus" pour les nouveaux messages
         setReadReceipts({});
       } else {
         console.error('Erreur envoi :', error);
@@ -98,7 +121,6 @@ function ChatWindow({ currentUser, friend }) {
     });
   };
 
-  // Émission de l'indicateur de frappe
   const handleTyping = () => {
     const socket = getSocket();
     if (!socket) return;
@@ -109,14 +131,68 @@ function ChatWindow({ currentUser, friend }) {
     }, 2000);
   };
 
-  // ── État : aucune conversation sélectionnée ──────────────────────────────
+  // ── Empty state : zone de recherche et d'ajout d'ami ──────────────────
   if (!friend) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#0d1117] select-none">
-        <div className="text-center space-y-4 opacity-30">
-          <div className="text-8xl">💬</div>
-          <h2 className="text-white text-xl font-semibold nunito-sans-font">AS-Chat</h2>
-          <p className="text-white/50 text-sm">Sélectionnez une conversation pour commencer</p>
+      <div className="flex-1 flex flex-col items-center justify-center bg-[#0d1117] px-8">
+        <div className="w-full max-w-sm space-y-6">
+
+          {/* Titre */}
+          <div className="text-center">
+            <div className="text-5xl mb-3">💬</div>
+            <h2 className="text-white font-bold text-lg">Nouvelle conversation</h2>
+            <p className="text-white/35 text-sm mt-1">Trouvez quelqu'un par son pseudo pour commencer</p>
+          </div>
+
+          {/* Input de recherche */}
+          <div className="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Rechercher un pseudo..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#21262d] border border-white/8 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-green-500/50 transition-all"
+            />
+            {isSearching && (
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+            )}
+          </div>
+
+          {/* Résultats */}
+          {searchResults.length > 0 && (
+            <div className="bg-[#21262d] border border-white/8 rounded-2xl overflow-hidden divide-y divide-white/5">
+              {searchResults.map((u) => {
+                const added = addedIds.has(u.id);
+                return (
+                  <div key={u.id} className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
+                      {u.username?.[0]?.toUpperCase()}
+                    </div>
+                    <p className="flex-1 text-white text-sm font-semibold">{u.username}</p>
+                    <button
+                      onClick={() => handleAddFriend(u)}
+                      disabled={addingId === u.id || added}
+                      className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all disabled:opacity-50 ${
+                        added
+                          ? 'bg-white/10 text-white/40 cursor-default'
+                          : 'bg-green-600 hover:bg-green-500 text-white'
+                      }`}
+                    >
+                      {added ? '✓ Demande envoyée' : addingId === u.id ? '...' : '+ Ajouter'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Aucun résultat */}
+          {searchQuery.trim().length >= 2 && !isSearching && searchResults.length === 0 && (
+            <p className="text-center text-white/25 text-sm">Aucun utilisateur trouvé pour "{searchQuery}"</p>
+          )}
         </div>
       </div>
     );
@@ -125,9 +201,8 @@ function ChatWindow({ currentUser, friend }) {
   return (
     <div className="flex-1 flex flex-col h-full bg-[#0d1117]">
 
-      {/* ── Header de la conversation ───────────────────────────────── */}
+      {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex-shrink-0 h-16 bg-[#161b22] border-b border-white/5 flex items-center px-6 gap-4">
-        {/* Avatar */}
         <div className="relative">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
             {friend.avatar_url
@@ -135,17 +210,11 @@ function ChatWindow({ currentUser, friend }) {
               : friend.username?.[0]?.toUpperCase()
             }
           </div>
-          {/* Point de statut — mis à jour en temps réel via le SocketContext → Chat → props */}
-          <span className={`
-            absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#161b22] transition-colors duration-500
-            ${friend.status === 'online' ? 'bg-green-400' : 'bg-white/20'}
-          `} />
+          <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#161b22] transition-colors duration-500 ${friend.status === 'online' ? 'bg-green-400' : 'bg-white/20'}`} />
         </div>
-
-        {/* Nom + statut ou indicateur de frappe */}
         <div>
           <h2 className="text-white font-semibold text-sm">{friend.username}</h2>
-          <p className="text-xs transition-all duration-300 min-h-[16px]">
+          <p className="text-xs min-h-[16px]">
             {isTyping
               ? <span className="text-green-400 italic animate-pulse">est en train d'écrire...</span>
               : <span className="text-white/35">{friend.status === 'online' ? 'En ligne' : 'Hors ligne'}</span>
@@ -154,7 +223,6 @@ function ChatWindow({ currentUser, friend }) {
         </div>
       </div>
 
-      {/* ── Liste des messages ───────────────────────────────────────── */}
       <MessageList
         messages={messages}
         currentUserId={currentUser?.id}
@@ -162,7 +230,6 @@ function ChatWindow({ currentUser, friend }) {
         allRead={readReceipts.all === true}
       />
 
-      {/* ── Champ de saisie ─────────────────────────────────────────── */}
       <MessageInput
         onSend={handleSend}
         onTyping={handleTyping}

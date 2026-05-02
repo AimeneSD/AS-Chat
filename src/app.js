@@ -7,10 +7,27 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
-const corsOptions = { //On definit l'autorisation API pour le frontend
-    origin : process.env.CORS_ORIGIN,
-    optionSuccessStatus:200
-}
+
+// Configuration CORS flexible (Production + Local)
+const allowedOrigins = [
+    process.env.CORS_ORIGIN,        // Ton URL Vercel
+    'http://localhost:5173',       // Ton Localhost Frontend
+    'http://127.0.0.1:5173'
+];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Autorise les requêtes sans origine (comme Postman ou serveurs internes) 
+        // ou si l'origine est dans la liste blanche
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Non autorisé par CORS'));
+        }
+    },
+    optionsSuccessStatus: 200,
+    credentials: true // Important pour Socket.io et les cookies
+};
 
 app.use(cors(corsOptions));
 
