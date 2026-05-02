@@ -78,7 +78,7 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
   // Debounce de la recherche d'utilisateurs
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
-      setSearchResults([]);
+      // La réinitialisation se fait maintenant dans le onChange
       return;
     }
     const t = setTimeout(async () => {
@@ -159,7 +159,13 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
               type="text"
               placeholder="Rechercher un pseudo..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                if (val.trim().length < 2) {
+                  setSearchResults([]);
+                }
+              }}
               className="w-full bg-[#21262d] border border-white/8 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-green-500/50 transition-all"
             />
             {isSearching && (

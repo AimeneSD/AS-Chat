@@ -1,9 +1,8 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {  useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/api';
 import { connectSocket, disconnectSocket } from '../socket/socket';
 
-// ─── Export du Context (utilisé par le hook) ──────────────────────────────────
-export const AuthContext = createContext(null);
+import { AuthContext } from './AuthContextInstance';
 
 // ─── Clés de stockage localStorage ───────────────────────────────────────────
 const TOKEN_KEY = 'as_chat_token';

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useSocket } from '../../contexts/SocketContext';
+import { useState, useEffect } from 'react';
+import { useSocket } from '../../hooks/useSocket';
 import { friendService } from '../../services/api';
 
 /**
@@ -26,11 +26,13 @@ function Sidebar({
 
   const totalUnread = Object.values(unreadCounts).reduce((sum, n) => sum + n, 0);
 
-  if (totalUnread > 0) {
-    document.title = `(${totalUnread}) AS-Chat`;
-  } else {
-    document.title = 'AS-Chat';
-  }
+  useEffect(() => {
+    if (totalUnread > 0) {
+      document.title = `(${totalUnread}) AS-Chat`;
+    } else {
+      document.title = 'AS-Chat';
+    }
+  }, [totalUnread]);
 
   const handleAccept = async (requesterId) => {
     setActionId(requesterId);
