@@ -1,15 +1,69 @@
+import MachaButton from "../components/ui/MachaButton";
+import { Link } from 'react-router-dom';
+
 function Signup() {
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+  const months = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold">Inscription</h1>
-      <form className="mt-4 flex flex-col gap-4 max-w-sm">
-        <input type="text" placeholder="Nom d'utilisateur" className="border p-2 rounded" />
-        <input type="email" placeholder="Email" className="border p-2 rounded" />
-        <input type="password" placeholder="Mot de passe" className="border p-2 rounded" />
-        <button className="bg-green-600 text-white p-2 rounded hover:bg-green-700 transition-colors">
-          S'inscrire
-        </button>
-      </form>
+    <div className="grow flex items-center justify-center">
+      <div className="bg-[#a4f3a6]/95 lg:w-[25vw] w-[85vw] h-fit flex flex-col items-center rounded-2xl backdrop-blur-sm p-8 shadow-2xl border border-white/20">
+        <div className="flex flex-col gap-y-6 text-center w-full">
+          <h1 className="text-3xl text-white font-bold tracking-tight">Créer un compte</h1>
+          
+          <form className="flex flex-col gap-5 w-full">
+            {/* Nom d'utilisateur */}
+            <div className="flex flex-col gap-1.5 text-left">
+              <label className="text-black/80 font-semibold text-sm ml-1" htmlFor="username">Nom d'utilisateur <span className="text-red-500">*</span></label>
+              <input type="text" placeholder="Comment doit-on vous appeler ?" className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black" />
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col gap-1.5 text-left">
+              <label className="text-black/80 font-semibold text-sm ml-1" htmlFor="email">E-mail <span className="text-red-500">*</span></label>
+              <input type="email" placeholder="votre@email.com" className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black" />
+            </div>
+
+            {/* Mot de passe */}
+            <div className="flex flex-col gap-1.5 text-left">
+              <label className="text-black/80 font-semibold text-sm ml-1" htmlFor="password">Mot de passe <span className="text-red-500">*</span></label>
+              <input type="password" placeholder="Min. 12 caractères" className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black" />
+            </div>
+
+            {/* Date de naissance */}
+            <div className="flex flex-col gap-2 text-left">
+              <label className="text-black/80 font-semibold text-sm ml-1">Date de naissance <span className="text-red-500">*</span></label>
+              <div className="flex gap-3">
+                <select className="flex-1 bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
+                  <option value="" disabled selected>Jour</option>
+                  {days.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+                <select className="flex-[2] bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
+                  <option value="" disabled selected>Mois</option>
+                  {months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+                </select>
+                <select className="flex-[1.5] bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
+                  <option value="" disabled selected>Année</option>
+                  {years.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <MachaButton label="S'inscrire" to="/signup" extraClassName="!w-full !rounded-2xl text-white !text-[1.1rem] !py-3.5 shadow-lg" />
+            </div>
+          </form>
+
+          <p className="text-black/70 text-sm">
+            Déjà un compte ? <Link to="/login" className="text-white font-bold hover:underline transition-all">Connectez-vous</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

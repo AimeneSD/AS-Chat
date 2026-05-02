@@ -6,7 +6,7 @@ function Home() {
       <div className="flex flex-col text- gap-y-6 max-w-[70vw]">
         <div className="flex flex-col max-w-[50%] pr-[4rem] gap-y-4">
           <h1 className="text-3xl hidden font-bold">AS-Chat</h1>
-          <h2 className="text-6xl  space-grotesk-font font-extrabold leading-[0.95]">VOTRE MESSAGERIE DE DISCUSSION EN TEMPS RÉEL</h2>
+          <h2 className="text-6xl font-extrabold leading-[0.95]">VOTRE MESSAGERIE DE DISCUSSION EN TEMPS RÉEL</h2>
           <p className="text-[22px] nunito-sans-font leading-[1.2] font-normal">AS-Chat est l'application de messagerie instantanée qui permet aux utilisateurs de communiquer entre eux de manière rapide et sécurisée.</p>
         </div>
         <div className="flex justify-center pt-26 pb-16">
