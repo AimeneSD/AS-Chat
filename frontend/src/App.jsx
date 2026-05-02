@@ -24,7 +24,7 @@ function AppRoutes({ isAuthenticated }) {
     <div className="min-h-screen flex flex-col" style={bgStyle}>
       <Header />
 
-      <main className="flex-grow flex flex-col text-white">
+      <main className="grow flex flex-col text-white">
         <Routes>
           {/* Routes publiques */}
           <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />

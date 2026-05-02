@@ -44,7 +44,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
   const isNearLimit = remaining < 200;
 
   return (
-    <div className="flex-shrink-0 bg-[#161b22] border-t border-white/5 px-4 py-3">
+    <div className="shrink-0 bg-[#161b22] border-t border-white/5 px-4 py-3">
       <div className="flex items-end gap-3 bg-[#21262d] rounded-2xl border border-white/8 px-4 py-3 focus-within:border-green-500/40 transition-colors">
         {/* Textarea auto-resize */}
         <textarea
@@ -60,7 +60,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
 
         {/* Compteur de caractères (visible seulement proche de la limite) */}
         {isNearLimit && (
-          <span className={`text-xs flex-shrink-0 mb-0.5 ${remaining < 50 ? 'text-red-400' : 'text-white/30'}`}>
+          <span className={`text-xs shrink-0 mb-0.5 ${remaining < 50 ? 'text-red-400' : 'text-white/30'}`}>
             {remaining}
           </span>
         )}
@@ -69,7 +69,7 @@ function MessageInput({ onSend, onTyping, disabled }) {
         <button
           onClick={handleSend}
           disabled={!content.trim() || disabled}
-          className="flex-shrink-0 w-9 h-9 rounded-xl bg-green-600 hover:bg-green-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all active:scale-95"
+          className="shrink-0 w-9 h-9 rounded-xl bg-green-600 hover:bg-green-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all active:scale-95"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

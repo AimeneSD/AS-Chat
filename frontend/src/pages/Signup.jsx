@@ -108,7 +108,7 @@ function Signup() {
                   <option value="" disabled defaultValue>Jour</option>
                   {days.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
-                <select className="flex-[2] bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
+                <select className="flex-2 bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
                   <option value="" disabled defaultValue>Mois</option>
                   {months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
                 </select>

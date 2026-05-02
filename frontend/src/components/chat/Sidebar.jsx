@@ -59,7 +59,7 @@ function Sidebar({
   };
 
   return (
-    <aside className="w-80 flex-shrink-0 h-full bg-[#161b22] border-r border-white/5 flex flex-col">
+    <aside className="w-80 shrink-0 h-full bg-[#161b22] border-r border-white/5 flex flex-col">
 
       {/* ── En-tête ─────────────────────────────────────────────────── */}
       <div className="p-4 border-b border-white/5">
@@ -141,7 +141,7 @@ function Sidebar({
                 className="flex items-center gap-3 px-4 py-2.5 bg-orange-500/5 border-b border-white/3"
               >
                 {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center font-bold text-white text-sm flex-shrink-0 shadow">
+                <div className="w-9 h-9 rounded-full bg-linear-to-br from-orange-400 to-amber-500 flex items-center justify-center font-bold text-white text-sm shrink-0 shadow">
                   {req.username?.[0]?.toUpperCase()}
                 </div>
 
@@ -149,7 +149,7 @@ function Sidebar({
                 <p className="flex-1 text-white/90 text-sm font-semibold truncate">{req.username}</p>
 
                 {/* Boutons Accepter / Refuser */}
-                <div className="flex gap-1.5 flex-shrink-0">
+                <div className="flex gap-1.5 shrink-0">
                   <button
                     onClick={() => handleAccept(req.id)}
                     disabled={actionId === req.id}
@@ -212,8 +212,8 @@ function Sidebar({
               `}
             >
               {/* Avatar */}
-              <div className="relative flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
+              <div className="relative shrink-0">
+                <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
                   {item.avatar_url
                     ? <img src={item.avatar_url} alt={item.username} className="w-full h-full rounded-full object-cover" />
                     : item.username?.[0]?.toUpperCase()
@@ -234,7 +234,7 @@ function Sidebar({
 
               {/* Badge non-lus */}
               {unread > 0 && !isSelected && (
-                <span className="flex-shrink-0 bg-green-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                <span className="shrink-0 bg-green-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                   {unread > 99 ? '99+' : unread}
                 </span>
               )}
@@ -245,7 +245,7 @@ function Sidebar({
 
       {/* ── Profil bas ─────────────────────────────────────────────── */}
       <div className="p-4 border-t border-white/5 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-xs flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-xs shrink-0">
           {user?.username?.[0]?.toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">

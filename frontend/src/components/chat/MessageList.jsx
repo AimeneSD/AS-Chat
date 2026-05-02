@@ -85,10 +85,10 @@ function MessageList({ messages, currentUserId, loading, allRead }) {
             {/* ── Bulle de message ─── */}
             <div className={`flex items-end gap-2 ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
               {/* Placeholder avatar (gauche uniquement) pour aligner les bulles */}
-              {!isMine && <div className="w-7 flex-shrink-0" />}
+              {!isMine && <div className="w-7 shrink-0" />}
 
               <div className={`
-                max-w-[65%] px-4 py-2.5 text-sm leading-relaxed break-words
+                max-w-[65%] px-4 py-2.5 text-sm leading-relaxed wrap-break-word
                 transition-all duration-200
                 ${isMine
                   ? `bg-green-600 text-white

@@ -25,15 +25,17 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
 
   const typingTimeoutRef = useRef(null);
 
+  const friendId = friend?.id;
+
   // Chargement de l'historique
   useEffect(() => {
-    if (!friend) return;
+    if (!friendId) return;
     const load = async () => {
       setLoadingMsgs(true);
       setMessages([]);
       setReadReceipts({});
       try {
-        const { data } = await messageService.getConversation(friend.id);
+        const { data } = await messageService.getConversation(friendId);
         setMessages(data.messages || []);
       } catch (err) {
         console.error('Erreur chargement messages :', err);
@@ -42,30 +44,30 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
       }
     };
     load();
-  }, [friend?.id]);
+  }, [friendId]);
 
   // Socket listeners
   useEffect(() => {
     const socket = getSocket();
-    if (!socket || !friend) return;
+    if (!socket || !friendId) return;
 
     const onReceive = (msg) => {
-      if (msg.sender_id === friend.id || msg.receiver_id === friend.id) {
+      if (msg.sender_id === friendId || msg.receiver_id === friendId) {
         setMessages((prev) => [...prev, msg]);
-        socket.emit('message:read', { senderId: friend.id });
+        socket.emit('message:read', { senderId: friendId });
       }
     };
     const onRead = ({ readBy }) => {
-      if (readBy === friend.id) setReadReceipts({ all: true });
+      if (readBy === friendId) setReadReceipts({ all: true });
     };
-    const onTyping     = ({ senderId }) => { if (senderId === friend.id) setIsTyping(true); };
-    const onStopTyping = ({ senderId }) => { if (senderId === friend.id) setIsTyping(false); };
+    const onTyping     = ({ senderId }) => { if (senderId === friendId) setIsTyping(true); };
+    const onStopTyping = ({ senderId }) => { if (senderId === friendId) setIsTyping(false); };
 
     socket.on('message:receive',    onReceive);
     socket.on('message:read',       onRead);
     socket.on('message:typing',     onTyping);
     socket.on('message:stopTyping', onStopTyping);
-    socket.emit('message:read', { senderId: friend.id });
+    socket.emit('message:read', { senderId: friendId });
 
     return () => {
       socket.off('message:receive',    onReceive);
@@ -73,7 +75,7 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
       socket.off('message:typing',     onTyping);
       socket.off('message:stopTyping', onStopTyping);
     };
-  }, [friend?.id]);
+  }, [friendId]);
 
   // Debounce de la recherche d'utilisateurs
   useEffect(() => {
@@ -180,7 +182,7 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
                 const added = addedIds.has(u.id);
                 return (
                   <div key={u.id} className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shrink-0">
                       {u.username?.[0]?.toUpperCase()}
                     </div>
                     <p className="flex-1 text-white text-sm font-semibold">{u.username}</p>
@@ -214,9 +216,9 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
     <div className="flex-1 flex flex-col h-full bg-[#0d1117]">
 
       {/* ── Header ─────────────────────────────────────────────── */}
-      <div className="flex-shrink-0 h-16 bg-[#161b22] border-b border-white/5 flex items-center px-6 gap-4">
+      <div className="shrink-0 h-16 bg-[#161b22] border-b border-white/5 flex items-center px-6 gap-4">
         <div className="relative">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
             {friend.avatar_url
               ? <img src={friend.avatar_url} alt={friend.username} className="w-full h-full rounded-full object-cover" />
               : friend.username?.[0]?.toUpperCase()
