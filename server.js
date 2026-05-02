@@ -1,0 +1,8 @@
+const app = require('./src/app');
+require('dotenv').config();
+
+const PORT = process.env.PORT;
+
+app.listen(PORT, () => {
+    console.log(`Serveur AS-Chat démarré sur le port ${PORT}`);
+});

@@ -1,7 +1,7 @@
 {
-  "name": "internsync",
+  "name": "as-chat-api",
   "version": "0.1.0",
-  "description": "initial version",
+  "description": "Backend API for AS-Chat",
   "homepage": "https://github.com/AimeneSD/InternSync#readme",
   "bugs": {
     "url": "https://github.com/AimeneSD/InternSync/issues"
@@ -13,17 +13,20 @@
   "license": "ISC",
   "author": "AimeneSD",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "npx nodemon index.js",
+    "start": "node server.js",
+    "dev": "npx nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.22.1",
     "nodemailer": "^8.0.5",
-    "react-router-dom": "^7.14.1"
+    "pusher": "^5.2.0"
   }
 }

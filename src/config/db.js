@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 require('dotenv').config();
 
-// Création d'un "Pool" de connexions (plus performant en JS qu'une connexion unique)
+// Pool de connexions sql
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -11,5 +11,5 @@ const pool = mysql.createPool({
     connectionLimit: 10
 });
 
-// On exporte la version "promise" pour pouvoir utiliser async/await plus tard
+// exporte version promise pour async/await
 module.exports = pool.promise();
