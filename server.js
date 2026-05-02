@@ -10,11 +10,25 @@ const PORT = process.env.PORT || 5000;
 // Il a besoin d'un serveur HTTP natif Node.js comme base.
 const httpServer = createServer(app);
 
+// Configuration des origines autorisées (identique à app.js)
+const allowedOrigins = [
+    process.env.CORS_ORIGIN,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+];
+
 // ── 2. Initialisation de Socket.io sur ce serveur HTTP ────────────────────────
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.CORS_ORIGIN,
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+                callback(null, true);
+            } else {
+                callback(new Error('Non autorisé par CORS (Socket.io)'));
+            }
+        },
         methods: ['GET', 'POST'],
+        credentials: true
     },
 });
 
