@@ -10,6 +10,46 @@ import Signup from './pages/Signup';
 import Chat from './pages/Chat';
 
 /**
+ * AppRoutes — Rendu des routes à l'intérieur du Router.
+ * Séparé pour que useLocation() soit disponible dans Header.
+ */
+function AppRoutes({ isAuthenticated }) {
+  // Fond vert dégradé sur les pages publiques, sombre sur le chat
+  const bgStyle = isAuthenticated
+    ? { background: '#0d1117' }
+    : { background: 'linear-gradient(300deg, #85d67b 70%, #53a449 95%, #000000 105%)' };
+
+  return (
+    <div className="min-h-screen flex flex-col" style={bgStyle}>
+      <Header />
+
+      <main className="flex-grow flex flex-col text-white">
+        <Routes>
+          {/* Routes publiques */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
+          {/* Route protégée */}
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+
+      {!isAuthenticated && <Footer />}
+    </div>
+  );
+}
+
+/**
  * AppContent — Sous-composant pour pouvoir utiliser useAuth().
  * Gère l'affichage du Splash Screen pendant le chargement initial.
  */
@@ -29,39 +69,7 @@ function AppContent() {
 
   return (
     <Router>
-      {/* 
-          Si on est sur le Chat, on veut un fond sombre uni.
-          Si on est sur les pages publiques, on garde ton dégradé vert.
-      */}
-      <div className={`min-h-screen flex flex-col transition-colors duration-500 ${
-        isAuthenticated ? 'bg-[#0d1117]' : 'bg-linear-[300deg,#85d67b_70%,#53a449_95%,#000000_105%]'
-      }`}>
-        <Header />
-
-        <main className="flex-grow flex flex-col text-white">
-          <Routes>
-            {/* Routes publiques */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-
-            {/* Route protégée */}
-            <Route
-              path="/chat"
-              element={
-                <ProtectedRoute>
-                  <Chat />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-
-        {/* On ne montre le footer que si on n'est pas sur le chat */}
-        {!isAuthenticated && <Footer />}
-      </div>
+      <AppRoutes isAuthenticated={isAuthenticated} />
     </Router>
   );
 }
