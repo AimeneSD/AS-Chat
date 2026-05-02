@@ -43,8 +43,8 @@ const AuthController = {
             return res.status(400).json({ error: 'Format d\'email invalide.' });
         }
 
-        if (password.length < 8) {
-            return res.status(400).json({ error: 'Le mot de passe doit faire au moins 8 caractères.' });
+        if (password.length < 12) {
+            return res.status(400).json({ error: 'Le mot de passe doit faire au moins 12 caractères.' });
         }
 
         // ── Vérification de l'unicité de l'email ────────────────────────────
