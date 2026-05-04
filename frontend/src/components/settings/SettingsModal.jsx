@@ -1,20 +1,10 @@
 import { useState } from "react";
 import Modal from "../ui/Modal";
 import { userService } from "../../services/api";
-import { useAuth } from "../../hooks/useAuth";
 
-function formatHiddenEmail(email) {
-    if (!email) return '';
-    const parts = email.split('@');
-    if (parts.length !== 2) return email;
-    const [localPart, domain] = parts;
-    const firstChar = localPart.charAt(0);
-    const hiddenPart = '●'.repeat(Math.max(localPart.length - 1, 7)); 
-    return `${firstChar}${hiddenPart}@${domain}`;
-}
+
 
 function SettingsModal({ isOpen, onClose, user }) {
-    // Il faut utiliser useAuth() si on veut rafraîchir l'utilisateur global après update
     // Mais pour la simplicité de l'exemple on peut juste recharger la page ou mettre à jour un state local.
     // L'idéal est d'avoir une fonction de raffraichissement passée en prop ou depuis le hook.
 
