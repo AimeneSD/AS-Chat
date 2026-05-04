@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const emailService = require('../services/emailService');
 
 // ─── Limites de contenu (Free Plan) ───────────────────────────────────────────
 const MAX_USERNAME_LENGTH = 30;
@@ -44,13 +45,23 @@ const UserController = {
     /**
      * PATCH /api/users/me
      * Met à jour le profil de l'utilisateur connecté.
-     * Body attendu : { username?, avatar_url? }
+     * Body attendu : { username?, currentPassword?, avatar_url? }
      */
     updateProfile: async (req, res) => {
-        const { username, avatar_url } = req.body;
+        const { username, currentPassword, avatar_url } = req.body;
 
         // ── Validation ──────────────────────────────────────────────────────────
         if (username !== undefined) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Le mot de passe actuel est requis pour changer de nom d\'utilisateur.' });
+            }
+            
+            const dbPassword = await User.findPasswordById(req.user.id);
+            const isValid = await User.verifyPassword(currentPassword, dbPassword);
+            if (!isValid) {
+                return res.status(401).json({ error: 'Mot de passe actuel incorrect.' });
+            }
+
             if (typeof username !== 'string' || username.trim().length < 3) {
                 return res.status(400).json({ error: 'Le username doit faire au moins 3 caractères.' });
             }
@@ -81,9 +92,73 @@ const UserController = {
     },
 
     /**
+     * POST /api/users/request-email-change
+     * Envoie un code de vérification à l'adresse e-mail actuelle
+     */
+    requestEmailChange: async (req, res) => {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
+
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        await User.saveVerificationCode(req.user.id, code);
+        await emailService.sendVerificationCode(user.email, code);
+
+        return res.status(200).json({ message: 'Code envoyé avec succès.' });
+    },
+
+    /**
+     * PATCH /api/users/email
+     * Vérifie le code et met à jour l'e-mail
+     */
+    updateEmail: async (req, res) => {
+        const { code, newEmail } = req.body;
+        if (!code || !newEmail) return res.status(400).json({ error: 'Code et nouvelle adresse requis.' });
+
+        const dbCodeInfo = await User.getVerificationCode(req.user.id);
+        if (!dbCodeInfo || !dbCodeInfo.verification_code) {
+            return res.status(400).json({ error: 'Aucun code de vérification trouvé ou expiré.' });
+        }
+
+        if (dbCodeInfo.verification_code !== code) {
+            return res.status(400).json({ error: 'Code de vérification incorrect.' });
+        }
+
+        if (new Date(dbCodeInfo.verification_expires_at) < new Date()) {
+            return res.status(400).json({ error: 'Code de vérification expiré.' });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(newEmail)) return res.status(400).json({ error: 'Format d\'e-mail invalide.' });
+
+        const existingUser = await User.findByEmail(newEmail);
+        if (existingUser) return res.status(409).json({ error: 'Cet e-mail est déjà utilisé.' });
+
+        await User.updateEmail(req.user.id, newEmail.toLowerCase());
+        await User.clearVerificationCode(req.user.id);
+
+        return res.status(200).json({ message: 'E-mail mis à jour avec succès.', email: newEmail });
+    },
+
+    /**
+     * PATCH /api/users/password
+     * Met à jour le mot de passe
+     */
+    updatePassword: async (req, res) => {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Mots de passe requis.' });
+        if (newPassword.length < 12) return res.status(400).json({ error: 'Le nouveau mot de passe doit faire au moins 12 caractères.' });
+
+        const dbPassword = await User.findPasswordById(req.user.id);
+        const isValid = await User.verifyPassword(currentPassword, dbPassword);
+        if (!isValid) return res.status(401).json({ error: 'Mot de passe actuel incorrect.' });
+
+        await User.updatePassword(req.user.id, newPassword);
+        return res.status(200).json({ message: 'Mot de passe mis à jour avec succès.' });
+    },
+
+    /**
      * GET /api/users/search?q=...
-     * Recherche des utilisateurs par username.
-     * Utilisé pour démarrer une nouvelle conversation.
      */
     search: async (req, res) => {
         const query = req.query.q;
@@ -92,9 +167,7 @@ const UserController = {
             return res.status(400).json({ error: 'La recherche doit contenir au moins 2 caractères.' });
         }
 
-        // On exclut l'utilisateur connecté des résultats
         const users = await User.search(query.trim(), req.user.id);
-
         return res.status(200).json(users);
     },
 };

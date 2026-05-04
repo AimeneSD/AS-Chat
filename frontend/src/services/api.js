@@ -45,9 +45,12 @@ export const authService = {
 
 // ─── Services User ────────────────────────────────────────────────────────────
 export const userService = {
-    search:        (query)  => api.get(`/users/search?q=${query}`),
-    getProfile:    (userId) => api.get(`/users/${userId}`),
-    updateProfile: (data)   => api.patch('/users/me', data),
+    search:             (query)  => api.get(`/users/search?q=${query}`),
+    getProfile:         (userId) => api.get(`/users/${userId}`),
+    updateProfile:      (data)   => api.patch('/users/me', data),
+    requestEmailChange: ()       => api.post('/users/request-email-change'),
+    updateEmail:        (data)   => api.patch('/users/email', data),
+    updatePassword:     (data)   => api.patch('/users/password', data),
 };
 
 // ─── Services Messages ────────────────────────────────────────────────────────
@@ -61,6 +64,7 @@ export const friendService = {
     getFriends:       ()         => api.get('/friends'),
     getPending:       ()         => api.get('/friends/pending'),
     getRelationship:  (userId)   => api.get(`/friends/relationship/${userId}`),
+    sendRequestByUsername: (username) => api.post('/friends/request-by-username', { username }),
     sendRequest:      (userId)   => api.post(`/friends/request/${userId}`),
     acceptRequest:    (userId)   => api.patch(`/friends/accept/${userId}`),
     declineOrRemove:  (userId)   => api.delete(`/friends/${userId}`),

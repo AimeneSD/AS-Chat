@@ -50,6 +50,17 @@ class User {
     }
 
     /**
+     * Recherche un utilisateur par son username EXACT.
+     * @param {string} username
+     * @returns {Promise<object|null>}
+     */
+    static async findByUsername(username) {
+        const sql = `SELECT id, username, avatar_url, status FROM users WHERE username = ? LIMIT 1`;
+        const [rows] = await db.execute(sql, [username]);
+        return rows[0] || null;
+    }
+
+    /**
      * Recherche un utilisateur par son ID.
      * Retourne les données sans le mot de passe (sécurité).
      * @param {number} id
@@ -133,6 +144,58 @@ class User {
      */
     static async verifyPassword(plainPassword, hashedPassword) {
         return bcrypt.compare(plainPassword, hashedPassword);
+    }
+
+    /**
+     * Récupère le mot de passe hashé d'un utilisateur
+     */
+    static async findPasswordById(id) {
+        const sql = `SELECT password FROM users WHERE id = ? LIMIT 1`;
+        const [rows] = await db.execute(sql, [id]);
+        return rows[0]?.password || null;
+    }
+
+    /**
+     * Sauvegarde un code de vérification pour un utilisateur (expire dans 15 min)
+     */
+    static async saveVerificationCode(userId, code) {
+        const sql = `UPDATE users SET verification_code = ?, verification_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE id = ?`;
+        await db.execute(sql, [code, userId]);
+    }
+
+    /**
+     * Récupère le code de vérification d'un utilisateur
+     */
+    static async getVerificationCode(userId) {
+        const sql = `SELECT verification_code, verification_expires_at FROM users WHERE id = ?`;
+        const [rows] = await db.execute(sql, [userId]);
+        return rows[0] || null;
+    }
+
+    /**
+     * Efface le code de vérification après succès
+     */
+    static async clearVerificationCode(userId) {
+        const sql = `UPDATE users SET verification_code = NULL, verification_expires_at = NULL WHERE id = ?`;
+        await db.execute(sql, [userId]);
+    }
+
+    /**
+     * Met à jour l'e-mail d'un utilisateur
+     */
+    static async updateEmail(userId, newEmail) {
+        const sql = `UPDATE users SET email = ? WHERE id = ?`;
+        await db.execute(sql, [newEmail, userId]);
+        return User.findById(userId);
+    }
+
+    /**
+     * Met à jour le mot de passe d'un utilisateur
+     */
+    static async updatePassword(userId, newPassword) {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const sql = `UPDATE users SET password = ? WHERE id = ?`;
+        await db.execute(sql, [hashedPassword, userId]);
     }
 }
 

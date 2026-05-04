@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { messageService, userService, friendService } from '../../services/api';
+import { messageService, } from '../../services/api';
 import { getSocket } from '../../socket/socket';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
@@ -15,7 +15,7 @@ import MessageInput from './MessageInput';
  */
 function ChatHeader({ friend, isTyping }) {
   return (
-    <div className="shrink-0 h-16 bg-[#161b22] border-b border-white/5 flex items-center px-6 gap-4">
+    <div className="shrink-0 h-16 bg-[#162516] border-b border-white/5 flex items-center px-6 gap-4">
       <div className="relative">
         <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
           {friend.avatar_url
@@ -39,93 +39,29 @@ function ChatHeader({ friend, isTyping }) {
 }
 
 /**
- * Sous-composant pour la zone de recherche (quand aucun ami n'est sélectionné)
+ * Sous-composant pour l'état vide (aucun ami sélectionné)
  */
-function ChatSearchState({ 
-  searchQuery, 
-  setSearchQuery, 
-  searchResults, 
-  setSearchResults, 
-  isSearching, 
-  handleAddFriend, 
-  addingId, 
-  addedIds 
-}) {
+function EmptyChatState() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-[#0d1117] px-8">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center">
-          <div className="text-5xl mb-3">💬</div>
-          <h2 className="text-white font-bold text-lg">Nouvelle conversation</h2>
-          <p className="text-white/35 text-sm mt-1">Trouvez quelqu'un par son pseudo pour commencer</p>
-        </div>
-
-        <div className="relative">
-          <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Rechercher un pseudo..."
-            value={searchQuery}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSearchQuery(val);
-              if (val.trim().length < 2) setSearchResults([]);
-            }}
-            className="w-full bg-[#21262d] border border-white/8 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-white/25 outline-none focus:border-green-500/50 transition-all"
-          />
-          {isSearching && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
-          )}
-        </div>
-
-        {searchResults.length > 0 && (
-          <div className="bg-[#21262d] border border-white/8 rounded-2xl overflow-hidden divide-y divide-white/5">
-            {searchResults.map((u) => {
-              const added = addedIds.has(u.id);
-              return (
-                <div key={u.id} className="flex items-center gap-3 px-4 py-3">
-                  <div className="w-9 h-9 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shrink-0">
-                    {u.username?.[0]?.toUpperCase()}
-                  </div>
-                  <p className="flex-1 text-white text-sm font-semibold">{u.username}</p>
-                  <button
-                    onClick={() => handleAddFriend(u)}
-                    disabled={addingId === u.id || added}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-all disabled:opacity-50 ${
-                      added
-                        ? 'bg-white/10 text-white/40 cursor-default'
-                        : 'bg-green-600 hover:bg-green-500 text-white'
-                    }`}
-                  >
-                    {added ? '✓ Demande envoyée' : addingId === u.id ? '...' : '+ Ajouter'}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {searchQuery.trim().length >= 2 && !isSearching && searchResults.length === 0 && (
-          <p className="text-center text-white/25 text-sm">Aucun utilisateur trouvé pour "{searchQuery}"</p>
-        )}
+    <div className="flex-1 flex flex-col items-center justify-center bg-[#2a3d25] px-8 text-center">
+      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
       </div>
+      <h2 className="text-white font-bold text-lg">Vos messages</h2>
+      <p className="text-white/35 text-sm mt-1 max-w-xs">
+        Sélectionnez un ami dans la liste pour commencer à discuter.
+      </p>
     </div>
   );
 }
 
-function ChatWindow({ currentUser, friend, onFriendAdded }) {
+function ChatWindow({ currentUser, friend }) {
   const [messages, setMessages]         = useState([]);
   const [isTyping, setIsTyping]         = useState(false);
   const [loadingMsgs, setLoadingMsgs]   = useState(false);
   const [readReceipts, setReadReceipts] = useState({});
-
-  const [searchQuery, setSearchQuery]     = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching]     = useState(false);
-  const [addingId, setAddingId]           = useState(null);
-  const [addedIds, setAddedIds]           = useState(new Set());
 
   const typingTimeoutRef = useRef(null);
   const friendId = friend?.id;
@@ -178,36 +114,10 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
     };
   }, [friendId]);
 
+  // Nettoyage des timers
   useEffect(() => {
-    if (searchQuery.trim().length < 2) return;
-    const t = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const { data } = await userService.search(searchQuery.trim());
-        setSearchResults(data);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 400);
-    return () => clearTimeout(t);
-  }, [searchQuery]);
-
-  const handleAddFriend = async (targetUser) => {
-    setAddingId(targetUser.id);
-    try {
-      await friendService.sendRequest(targetUser.id);
-      setAddedIds((prev) => new Set([...prev, targetUser.id]));
-      onFriendAdded?.();
-    } catch (err) {
-      if (err.response?.status === 409) {
-        setAddedIds((prev) => new Set([...prev, targetUser.id]));
-      }
-    } finally {
-      setAddingId(null);
-    }
-  };
+    return () => clearTimeout(typingTimeoutRef.current);
+  }, []);
 
   const handleSend = (content) => {
     const socket = getSocket();
@@ -231,22 +141,11 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
   };
 
   if (!friend) {
-    return (
-      <ChatSearchState
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchResults={searchResults}
-        setSearchResults={setSearchResults}
-        isSearching={isSearching}
-        handleAddFriend={handleAddFriend}
-        addingId={addingId}
-        addedIds={addedIds}
-      />
-    );
+    return <EmptyChatState />;
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0d1117]">
+    <div className="flex-1 flex flex-col h-full bg-[#162014]">
       <ChatHeader friend={friend} isTyping={isTyping} />
       <MessageList
         messages={messages}

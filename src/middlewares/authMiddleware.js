@@ -1,14 +1,13 @@
 const jwt = require('jsonwebtoken');
 
 /**
- * Middleware d'authentification JWT pour AS-Chat.
- *
- * Attend un header Authorization de la forme :
- *   Authorization: Bearer <token>
- *
- * En cas de succès, injecte req.user = { id, username, email }
- * pour que tous les controllers puissent l'utiliser.
- */
+* Middleware d'authentification JWT pour AS-Chat.
+*
+* Attend un header Authorization de la forme : Authorization: Bearer <token>
+*
+* En cas de succès, injecte req.user = { id, username, email }
+* pour que tous les controllers puissent l'utiliser.
+*/
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers['authorization'];
 

@@ -34,6 +34,45 @@ const FriendController = {
     },
 
     /**
+     * POST /api/friends/request-by-username
+     * Envoie une demande d'ami via le pseudo exact.
+     */
+    sendRequestByUsername: async (req, res) => {
+        const requesterId = req.user.id;
+        const { username } = req.body;
+
+        if (!username) {
+            return res.status(400).json({ error: 'Pseudo requis.' });
+        }
+
+        const User = require('../models/User');
+        const targetUser = await User.findByUsername(username);
+
+        if (!targetUser) {
+            return res.status(404).json({ error: 'Utilisateur introuvable.' });
+        }
+
+        const addresseeId = targetUser.id;
+
+        if (requesterId === addresseeId) {
+            return res.status(400).json({ error: 'Vous ne pouvez pas vous envoyer une demande.' });
+        }
+
+        const existing = await Friend.getRelationship(requesterId, addresseeId);
+        if (existing) {
+            const messages = {
+                pending:  'Une demande est déjà en attente.',
+                accepted: 'Vous êtes déjà amis.',
+                blocked:  'Impossible d\'envoyer une demande.',
+            };
+            return res.status(409).json({ error: messages[existing] });
+        }
+
+        const request = await Friend.sendRequest(requesterId, addresseeId);
+        return res.status(201).json(request);
+    },
+
+    /**
      * PATCH /api/friends/accept/:requesterId
      * Accepte la demande d'ami d'un utilisateur.
      */

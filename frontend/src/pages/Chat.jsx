@@ -4,10 +4,11 @@ import { SocketProvider } from '../contexts/SocketContext';
 import { friendService } from '../services/api';
 import Sidebar from '../components/chat/Sidebar';
 import ChatWindow from '../components/chat/ChatWindow';
+import SettingsModal from '../components/settings/SettingsModal';
 
 function Chat() {
   const { user, logout } = useAuth();
-
+  const [isSettingsOpen,setIsSettingsOpen] = useState(false);
   const [friends, setFriends]                   = useState([]);
   const [pendingRequests, setPendingRequests]   = useState([]);
   const [selectedFriend, setSelectedFriend]     = useState(null);
@@ -82,6 +83,12 @@ function Chat() {
           onSidebarModeChange={setSidebarMode}
           onLogout={logout}
           onFriendAdded={refreshAll}
+          onOpenSettings={()=>setIsSettingsOpen(!isSettingsOpen)}
+        />
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={()=>setIsSettingsOpen(!isSettingsOpen)}
+          user={user}
         />
 
         <ChatWindow

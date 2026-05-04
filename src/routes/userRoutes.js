@@ -1,13 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/UserController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middlewares/authMiddleware'); // Retiré dans index.js, mais par sécurité on le laisse si besoin. Attends, index.js a l'authMiddleware, je vais le retirer d'ici.
 
-// Routes utilisateur AS-Chat (toutes protégées par JWT)
-// (routes statiques déclarées AVANT les routes dynamiques :id)
-router.get('/search', authMiddleware, UserController.search);
-router.get('/me',     authMiddleware, UserController.getMe);
-router.patch('/me',   authMiddleware, UserController.updateProfile);
-router.get('/:id',    authMiddleware, UserController.getProfile);
+// (Le middleware est maintenant appliqué dans index.js)
+router.get('/search', UserController.search);
+router.get('/me',     UserController.getMe);
+router.patch('/me',   UserController.updateProfile);
+router.get('/:id',    UserController.getProfile);
+
+// Nouvelles routes pour les paramètres de compte
+router.post('/request-email-change', UserController.requestEmailChange);
+router.patch('/email',               UserController.updateEmail);
+router.patch('/password',            UserController.updatePassword);
 
 module.exports = router;

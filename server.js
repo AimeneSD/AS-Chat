@@ -38,6 +38,6 @@ socketHandler(io);
 
 // ── 4. Démarrage du serveur ───────────────────────────────────────────────────
 httpServer.listen(PORT, () => {
-    console.log(`[AS-Chat] Serveur démarré sur le port ${PORT}`);
-    console.log(`[AS-Chat] Socket.io actif`);
+    console.log(`Serveur démarré sur le port ${PORT}`);
+    console.log(`Socket.io actif`);
 });
