@@ -2,10 +2,12 @@ const nodemailer = require('nodemailer');
 
 // Configuration du transporteur SMTP (Gmail)
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // use SSL
     auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS, // Mot de passe d'application à 16 caractères
+        pass: process.env.SMTP_PASS,
     },
 });
 
@@ -16,6 +18,7 @@ const emailService = {
      * @param {string} code - Le code à 6 chiffres
      */
     sendVerificationCode: async (email, code) => {
+        console.log(`[Nodemailer] Tentative d'envoi à: ${email}...`);
         try {
             const mailOptions = {
                 from: `"AS-Chat" <${process.env.SMTP_USER}>`,
