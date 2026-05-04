@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors'); // CORS (Cross-Origin Resource Sharing): permet de definir qui peut faire des call API ici
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 const apiRouter = require('./routes/index');//on récupère la route api de routes/index.js
 
@@ -7,6 +8,7 @@ const app = express();
 
 // Middlewares
 app.use(express.json());
+app.use(cookieParser());
 
 // Configuration CORS flexible (Production + Local)
 const allowedOrigins = [

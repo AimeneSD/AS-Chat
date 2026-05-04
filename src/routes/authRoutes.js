@@ -6,6 +6,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 // Routes d'authentification AS-Chat
 router.post('/register', AuthController.register);
 router.post('/login',    AuthController.login);
+router.post('/logout',   AuthController.logout);
 router.get('/me',        authMiddleware, AuthController.me); // Route protégée
 
 module.exports = router;

@@ -7,16 +7,15 @@ let socket = null;
 
 /**
  * Initialise et retourne la connexion Socket.io.
- * À appeler une seule fois après le login, avec le token JWT.
- * @param {string} token - Le JWT récupéré après login
+ * À appeler une seule fois après le login.
  * @returns {Socket}
  */
-export const connectSocket = (token) => {
+export const connectSocket = () => {
     if (socket?.connected) return socket;
 
     socket = io(SOCKET_URL, {
-        // On envoie le JWT dans le handshake pour que le middleware serveur puisse l'authentifier
-        auth: { token },
+        // withCredentials permet d'envoyer automatiquement le cookie HttpOnly lors du handshake
+        withCredentials: true,
         // Reconnexion automatique si la connexion est perdue (coupure réseau, etc.)
         reconnection: true,
         reconnectionAttempts: 5,

@@ -16,6 +16,18 @@ const generateToken = (user) => {
     );
 };
 
+/**
+ * Configure les options pour le cookie HttpOnly du JWT
+ */
+const getCookieOptions = () => {
+    return {
+        httpOnly: true, // Empêche l'accès via JavaScript (protection XSS)
+        secure: process.env.NODE_ENV === 'production', // Uniquement sur HTTPS en production
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Requis pour les requêtes cross-origin (ex: Vercel -> Render)
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 jours
+    };
+};
+
 // ─── Controller ────────────────────────────────────────────────────────────────
 
 const AuthController = {
@@ -59,9 +71,11 @@ const AuthController = {
         // ── Génération du token et réponse ───────────────────────────────────
         const token = generateToken(newUser);
 
+        // Envoyer le token dans un cookie
+        res.cookie('as_chat_token', token, getCookieOptions());
+
         return res.status(201).json({
             message: 'Compte créé avec succès.',
-            token,
             user: {
                 id: newUser.id,
                 username: newUser.username,
@@ -101,15 +115,30 @@ const AuthController = {
         // ── Génération du token et réponse ───────────────────────────────────
         const token = generateToken(user);
 
+        // Envoyer le token dans un cookie
+        res.cookie('as_chat_token', token, getCookieOptions());
+
         return res.status(200).json({
             message: 'Connexion réussie.',
-            token,
             user: {
                 id: user.id,
                 username: user.username,
                 email: user.email,
             },
         });
+    },
+
+    /**
+     * POST /api/auth/logout
+     * Déconnecte l'utilisateur en supprimant le cookie JWT.
+     */
+    logout: async (req, res) => {
+        res.clearCookie('as_chat_token', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        });
+        return res.status(200).json({ message: 'Déconnexion réussie.' });
     },
 
     /**

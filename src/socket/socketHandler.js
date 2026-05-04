@@ -15,10 +15,17 @@ const User = require('../models/User');
 module.exports = (io) => {
 
     // ── Middleware JWT pour Socket.io ──────────────────────────────────────────
-    // Avant d'accepter une connexion, on vérifie le token JWT envoyé par le client.
-    // Le client doit envoyer : socket = io(URL, { auth: { token: '...' } })
+    // Avant d'accepter une connexion, on vérifie le token JWT envoyé via les cookies
     io.use((socket, next) => {
-        const token = socket.handshake.auth?.token;
+        const cookieHeader = socket.handshake.headers.cookie;
+        let token = null;
+        
+        if (cookieHeader) {
+            const tokenCookie = cookieHeader.split(';').find(c => c.trim().startsWith('as_chat_token='));
+            if (tokenCookie) {
+                token = tokenCookie.split('=')[1];
+            }
+        }
 
         if (!token) {
             return next(new Error('Authentification requise.'));

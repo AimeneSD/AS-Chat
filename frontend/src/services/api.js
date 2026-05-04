@@ -9,17 +9,7 @@ const api = axios.create({
     withCredentials: true
 });
 
-// ── Intercepteur de requête ────────────────────────────────────────────────────
-// Avant chaque requête, on récupère le token depuis le localStorage
-// et on l'ajoute automatiquement dans le header Authorization.
-// Grâce à ça, on n'a jamais besoin de passer le token manuellement.
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('as_chat_token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+
 
 // ── Intercepteur de réponse ────────────────────────────────────────────────────
 // Si le serveur répond 401 (token expiré ou invalide), on déconnecte
@@ -27,8 +17,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response, // Cas normal : on retourne la réponse telle quelle
     (error) => {
-        if (error.response?.status === 401) {
-            localStorage.removeItem('as_chat_token');
+        if (error.response?.status === 401 && !error.config.url.includes('/auth/me')) {
             localStorage.removeItem('as_chat_user');
             window.location.href = '/login';
         }
@@ -40,6 +29,7 @@ api.interceptors.response.use(
 export const authService = {
     register: (data) => api.post('/auth/register', data),
     login:    (data) => api.post('/auth/login', data),
+    logout:   ()     => api.post('/auth/logout'),
     me:       ()     => api.get('/auth/me'),
 };
 

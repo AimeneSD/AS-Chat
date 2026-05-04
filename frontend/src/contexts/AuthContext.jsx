@@ -4,8 +4,6 @@ import { connectSocket, disconnectSocket } from '../socket/socket';
 
 import { AuthContext } from './AuthContextInstance';
 
-// ─── Clés de stockage localStorage ───────────────────────────────────────────
-const TOKEN_KEY = 'as_chat_token';
 const USER_KEY  = 'as_chat_user';
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
@@ -15,23 +13,15 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true); // true pendant la vérification initiale du token
 
     // ── Auto-login au démarrage ──────────────────────────────────────────────
-    // Si un token existe en localStorage, on vérifie qu'il est encore valide
-    // en appelant /api/auth/me. Si le serveur répond OK, on restaure la session.
+    // On appelle toujours /api/auth/me au démarrage pour voir si on a un cookie de session valide.
     useEffect(() => {
         const restoreSession = async () => {
-            const token = localStorage.getItem(TOKEN_KEY);
-            if (!token) {
-                setLoading(false);
-                return;
-            }
-
             try {
                 const { data } = await authService.me();
                 setUser(data);
-                connectSocket(token); // On reconnecte le socket avec la session restaurée
+                connectSocket(); // On connecte le socket (le cookie partira avec)
             } catch {
-                // Token invalide ou expiré : on nettoie le localStorage
-                localStorage.removeItem(TOKEN_KEY);
+                // Token invalide, manquant ou expiré : on nettoie le localStorage
                 localStorage.removeItem(USER_KEY);
             } finally {
                 setLoading(false);
@@ -45,11 +35,10 @@ export function AuthProvider({ children }) {
     const login = useCallback(async (email, password) => {
         const { data } = await authService.login({ email, password });
 
-        localStorage.setItem(TOKEN_KEY, data.token);
         localStorage.setItem(USER_KEY, JSON.stringify(data.user));
 
         setUser(data.user);
-        connectSocket(data.token); // On ouvre la connexion temps réel dès le login
+        connectSocket(); // On ouvre la connexion temps réel dès le login
         return data;
     }, []);
 
@@ -57,17 +46,20 @@ export function AuthProvider({ children }) {
     const register = useCallback(async (username, email, password) => {
         const { data } = await authService.register({ username, email, password });
 
-        localStorage.setItem(TOKEN_KEY, data.token);
         localStorage.setItem(USER_KEY, JSON.stringify(data.user));
 
         setUser(data.user);
-        connectSocket(data.token);
+        connectSocket();
         return data;
     }, []);
 
     // ── logout ───────────────────────────────────────────────────────────────
-    const logout = useCallback(() => {
-        localStorage.removeItem(TOKEN_KEY);
+    const logout = useCallback(async () => {
+        try {
+            await authService.logout(); // On demande au serveur de supprimer le cookie
+        } catch (err) {
+            console.error('Erreur lors de la déconnexion backend', err);
+        }
         localStorage.removeItem(USER_KEY);
         setUser(null);
         disconnectSocket(); // On coupe la connexion Socket.io proprement
