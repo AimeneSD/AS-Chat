@@ -10,8 +10,6 @@ router.patch('/me',   UserController.updateProfile);
 router.get('/:id',    UserController.getProfile);
 
 // Nouvelles routes pour les paramètres de compte
-router.post('/request-email-change', UserController.requestEmailChange);
-router.patch('/email',               UserController.updateEmail);
 router.patch('/password',            UserController.updatePassword);
 
 module.exports = router;

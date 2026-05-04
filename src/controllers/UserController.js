@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const emailService = require('../services/emailService');
 
 // ─── Limites de contenu (Free Plan) ───────────────────────────────────────────
 const MAX_USERNAME_LENGTH = 30;
@@ -91,71 +90,7 @@ const UserController = {
         return res.status(200).json(updatedUser);
     },
 
-    /**
-     * POST /api/users/request-email-change
-     * Envoie un code de vérification à l'adresse e-mail actuelle
-     */
-    requestEmailChange: async (req, res) => {
-        try {
-            console.log(`[EmailChange] DEBUT - Utilisateur ID: ${req.user.id}`);
-            const user = await User.findById(req.user.id);
-            if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
 
-            const code = Math.floor(100000 + Math.random() * 900000).toString();
-            console.log(`[EmailChange] Code généré: ${code} pour ${user.email}`);
-            
-            console.log(`[EmailChange] Tentative sauvegarde DB...`);
-            await User.saveVerificationCode(req.user.id, code);
-            console.log(`[EmailChange] Sauvegarde DB OK`);
-
-            console.log(`[EmailChange] Tentative envoi e-mail via service...`);
-            await emailService.sendVerificationCode(user.email, code);
-            console.log(`[EmailChange] Envoi e-mail OK`);
-
-            return res.status(200).json({ message: 'Code envoyé avec succès.' });
-        } catch (error) {
-            console.error('[EmailChange Error] DETAIL:', error);
-            return res.status(500).json({ error: 'Erreur lors de la demande de changement d\'e-mail.' });
-        }
-    },
-
-    /**
-     * PATCH /api/users/email
-     * Vérifie le code et met à jour l'e-mail
-     */
-    updateEmail: async (req, res) => {
-        try {
-            const { code, newEmail } = req.body;
-            if (!code || !newEmail) return res.status(400).json({ error: 'Code et nouvelle adresse requis.' });
-
-            const dbCodeInfo = await User.getVerificationCode(req.user.id);
-            if (!dbCodeInfo || !dbCodeInfo.verification_code) {
-                return res.status(400).json({ error: 'Aucun code de vérification trouvé ou expiré.' });
-            }
-
-            if (dbCodeInfo.verification_code !== code) {
-                return res.status(400).json({ error: 'Code de vérification incorrect.' });
-            }
-
-            if (new Date(dbCodeInfo.verification_expires_at) < new Date()) {
-                return res.status(400).json({ error: 'Code de vérification expiré.' });
-            }
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(newEmail)) return res.status(400).json({ error: 'Format d\'e-mail invalide.' });
-
-            const existingUser = await User.findByEmail(newEmail);
-            if (existingUser) return res.status(409).json({ error: 'Cet e-mail est déjà utilisé.' });
-
-            await User.updateEmail(req.user.id, newEmail.toLowerCase());
-            await User.clearVerificationCode(req.user.id);
-
-            return res.status(200).json({ message: 'E-mail mis à jour avec succès.', email: newEmail });
-        } catch (error) {
-            console.error('[UpdateEmail Error]', error);
-            return res.status(500).json({ error: 'Erreur lors de la mise à jour de l\'e-mail.' });
-        }
-    },
 
     /**
      * PATCH /api/users/password

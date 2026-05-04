@@ -48,8 +48,6 @@ export const userService = {
     search:             (query)  => api.get(`/users/search?q=${query}`),
     getProfile:         (userId) => api.get(`/users/${userId}`),
     updateProfile:      (data)   => api.patch('/users/me', data),
-    requestEmailChange: ()       => api.post('/users/request-email-change'),
-    updateEmail:        (data)   => api.patch('/users/email', data),
     updatePassword:     (data)   => api.patch('/users/password', data),
 };
 
