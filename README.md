@@ -48,7 +48,3 @@ AS-Chat est une application de messagerie instantanée moderne et réactive, con
 ### Authentification & Protection CSRF
 L'application utilise une authentification basée sur les **Tokens JWT**.
 Contrairement aux architectures traditionnelles utilisant des cookies de session, AS-Chat stocke le token JWT côté client (localStorage) et l'envoie explicitement dans les requêtes via le header HTTP `Authorization: Bearer <token>`.
-
-> **Note de sécurité concernant le CSRF :**
-> Puisque le navigateur n'attache **pas** automatiquement les identifiants (cookies) lors des requêtes inter-sites, **cette architecture est par conception immunisée contre les attaques CSRF (Cross-Site Request Forgery)**.
-> C'est pourquoi l'API Express ne nécessite pas de middleware de protection CSRF (tel que `csurf` ou `csrf-sync`), évitant ainsi une surcharge inutile du serveur. L'outil d'analyse de code statique peut remonter un faux positif sur les routes POST, ce comportement est attendu et justifié.

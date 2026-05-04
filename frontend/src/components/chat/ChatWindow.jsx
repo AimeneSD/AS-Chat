@@ -260,6 +260,3 @@ function ChatWindow({ currentUser, friend, onFriendAdded }) {
 }
 
 export default ChatWindow;
-
-
-export default ChatWindow;

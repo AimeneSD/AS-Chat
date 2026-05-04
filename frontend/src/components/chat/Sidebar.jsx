@@ -49,46 +49,74 @@ function PendingRequestItem({ req, actionId, onAccept, onDecline }) {
 }
 
 /**
+ * Helpers pour SidebarItem
+ */
+function getContainerClasses(isSelected, unread) {
+  const base = "flex items-center gap-3 px-4 py-3 cursor-pointer transition-all";
+  if (isSelected) return `${base} bg-green-500/10 border-r-2 border-green-500`;
+  if (unread > 0) return `${base} bg-green-500/5 hover:bg-white/4`;
+  return `${base} hover:bg-white/4`;
+}
+
+function getAvatarIndicatorClasses(isOnline) {
+  const color = isOnline ? 'bg-green-400' : 'bg-white/15';
+  return `absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#161b22] transition-colors duration-500 ${color}`;
+}
+
+function getTextClasses(isSelected, unread) {
+  if (isSelected) return "text-sm font-semibold truncate text-green-400";
+  if (unread > 0) return "text-sm font-semibold truncate text-white";
+  return "text-sm font-semibold truncate text-white/80";
+}
+
+function SidebarAvatar({ item }) {
+  return (
+    <div className="relative shrink-0">
+      <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
+        {item.avatar_url ? (
+          <img src={item.avatar_url} alt={item.username} className="w-full h-full rounded-full object-cover" />
+        ) : (
+          item.username?.[0]?.toUpperCase()
+        )}
+      </div>
+      <span className={getAvatarIndicatorClasses(item.status === 'online')} />
+    </div>
+  );
+}
+
+function UnreadBadge({ unread, isSelected }) {
+  if (unread <= 0 || isSelected) return null;
+  const displayUnread = unread > 99 ? '99+' : unread;
+  return (
+    <span className="shrink-0 bg-green-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+      {displayUnread}
+    </span>
+  );
+}
+
+/**
  * Sous-composant pour un item de la sidebar (ami ou conversation)
  */
 function SidebarItem({ item, isSelected, unread, onSelect }) {
+  const containerClasses = getContainerClasses(isSelected, unread);
+  const textClasses = getTextClasses(isSelected, unread);
+  const statusText = item.status === 'online' ? '● En ligne' : '○ Hors ligne';
+
   return (
-    <div
-      onClick={() => onSelect(item)}
-      className={`
-        flex items-center gap-3 px-4 py-3 cursor-pointer transition-all
-        ${isSelected
-          ? 'bg-green-500/10 border-r-2 border-green-500'
-          : 'hover:bg-white/4'}
-        ${unread > 0 && !isSelected ? 'bg-green-500/5' : ''}
-      `}
-    >
-      <div className="relative shrink-0">
-        <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
-          {item.avatar_url
-            ? <img src={item.avatar_url} alt={item.username} className="w-full h-full rounded-full object-cover" />
-            : item.username?.[0]?.toUpperCase()
-          }
-        </div>
-        <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-[#161b22] transition-colors duration-500 ${item.status === 'online' ? 'bg-green-400' : 'bg-white/15'}`} />
-      </div>
-
+    <div onClick={() => onSelect(item)} className={containerClasses}>
+      <SidebarAvatar item={item} />
+      
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-semibold truncate ${isSelected ? 'text-green-400' : unread > 0 ? 'text-white' : 'text-white/80'}`}>
-          {item.username}
-        </p>
-        <p className="text-xs text-white/30 truncate">
-          {item.status === 'online' ? '● En ligne' : '○ Hors ligne'}
-        </p>
+        <p className={textClasses}>{item.username}</p>
+        <p className="text-xs text-white/30 truncate">{statusText}</p>
       </div>
 
-      {unread > 0 && !isSelected && (
-        <span className="shrink-0 bg-green-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-          {unread > 99 ? '99+' : unread}
-        </span>
-      )}
+      <UnreadBadge unread={unread} isSelected={isSelected} />
     </div>
- /**
+  );
+}
+
+/**
  * Sous-composant pour l'en-tête de la Sidebar
  */
 function SidebarHeader({ totalUnread, onLogout }) {
