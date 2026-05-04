@@ -79,6 +79,44 @@ function MessageItem({
   );
 }
 
+/**
+ * Prépare les métadonnées de chaque message pour le rendu
+ */
+function useMessageMetadata(messages, currentUserId, allRead, formatDateLabel) {
+  let lastSentIndex = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].sender_id === currentUserId) {
+      lastSentIndex = i;
+      break;
+    }
+  }
+
+  return messages.map((msg, index) => {
+    const prevMsg = messages[index - 1];
+    const nextMsg = messages[index + 1];
+    
+    const isMine = msg.sender_id === currentUserId;
+    const msgDateLabel = formatDateLabel(msg.created_at);
+    const prevMsgDateLabel = prevMsg ? formatDateLabel(prevMsg.created_at) : null;
+    
+    const showDate = !prevMsg || msgDateLabel !== prevMsgDateLabel;
+    const isFirstOfGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id || showDate;
+    const isLastOfGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
+    const isLastSent = index === lastSentIndex;
+    const showReadReceipt = isMine && isLastSent && allRead;
+
+    return {
+      msg,
+      isMine,
+      isFirstOfGroup,
+      isLastOfGroup,
+      showDate,
+      showReadReceipt,
+      isLastSent
+    };
+  });
+}
+
 function MessageList({ messages, currentUserId, loading, allRead }) {
   const bottomRef = useRef(null);
 
@@ -116,48 +154,23 @@ function MessageList({ messages, currentUserId, loading, allRead }) {
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
   };
 
-  let lastSentIndex = -1;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].sender_id === currentUserId) {
-      lastSentIndex = i;
-      break;
-    }
-  }
+  const processedMessages = useMessageMetadata(messages, currentUserId, allRead, formatDateLabel);
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-0.5 flex flex-col">
-      {messages.map((msg, index) => {
-        const prevMsg = messages[index - 1];
-        const nextMsg = messages[index + 1];
-        
-        const isMine = msg.sender_id === currentUserId;
-        const msgDateLabel = formatDateLabel(msg.created_at);
-        const prevMsgDateLabel = prevMsg ? formatDateLabel(prevMsg.created_at) : null;
-        
-        const showDate = !prevMsg || msgDateLabel !== prevMsgDateLabel;
-        const isFirstOfGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id || showDate;
-        const isLastOfGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
-
-        return (
-          <MessageItem
-            key={msg.id}
-            msg={msg}
-            isMine={isMine}
-            isFirstOfGroup={isFirstOfGroup}
-            isLastOfGroup={isLastOfGroup}
-            showDate={showDate}
-            showReadReceipt={isMine && index === lastSentIndex && allRead}
-            isLastSent={index === lastSentIndex}
-            allRead={allRead}
-            formatDateLabel={formatDateLabel}
-            formatTime={formatTime}
-          />
-        );
-      })}
+      {processedMessages.map(({ msg, ...meta }) => (
+        <MessageItem
+          key={msg.id}
+          msg={msg}
+          allRead={allRead}
+          formatDateLabel={formatDateLabel}
+          formatTime={formatTime}
+          {...meta}
+        />
+      ))}
       <div ref={bottomRef} />
     </div>
   );
 }
 
 export default MessageList;
-
