@@ -101,7 +101,7 @@ function UnreadBadge({ unread, isSelected }) {
 function SidebarItem({ item, isSelected, unread, onSelect }) {
   const containerClasses = getContainerClasses(isSelected, unread);
   const textClasses = getTextClasses(isSelected, unread);
-  const statusText = item.status === 'online' ? '● En ligne' : '○ Hors ligne';
+  const statusText = item.status === 'online' ? '● En ligne' : 'Hors ligne';
 
   return (
     <div onClick={() => onSelect(item)} className={containerClasses}>
@@ -150,7 +150,7 @@ function SidebarTabs({ sidebarMode, onSidebarModeChange, onSearchChange, pending
         <button
           key={mode}
           onClick={() => { onSidebarModeChange(mode); onSearchChange(''); }}
-          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-all relative ${sidebarMode === mode ? 'bg-green-600 text-white shadow' : 'text-white/40 hover:text-white/70'}`}
+          className={`hover:cursor-pointer flex-1 text-xs font-semibold py-2 rounded-lg transition-all relative ${sidebarMode === mode ? 'bg-green-600 text-white shadow' : 'text-white/40 hover:text-white/70'}`}
         >
           {mode === 'conversations' ? 'Discussions' : 'Amis'}
           {mode === 'friends' && pendingRequestsCount > 0 && (
@@ -367,7 +367,7 @@ function Sidebar({
   };
 
   return (
-    <aside className="w-80 shrink-0 h-full bg-[#162516] border-r border-white/5 flex flex-col">
+    <aside className="w-full shrink-0 h-full bg-[#162516] border-r border-white/5 flex flex-col">
       <div className="p-4 border-b border-white/5">
         <SidebarHeader totalUnread={totalUnread} onLogout={onLogout} />
         <SidebarTabs 

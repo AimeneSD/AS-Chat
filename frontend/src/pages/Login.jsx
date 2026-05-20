@@ -19,7 +19,7 @@ function Login() {
 
     try {
       await login(email, password);
-      navigate('/chat'); // Redirection vers le chat après connexion
+      navigate('/chat');
     } catch (err) {
       setError(err.response?.data?.error || 'Une erreur est survenue.');
     } finally {
@@ -28,13 +28,13 @@ function Login() {
   };
 
   return (
-    <div className="grow flex items-center justify-center">
-      <div className="bg-[#a4f3a6]/95 lg:w-[25vw] w-[85vw] h-fit flex flex-col items-center rounded-2xl backdrop-blur-sm p-8 shadow-2xl border border-white/20">
-        <div className="flex flex-col gap-y-8 text-center w-full">
-          <h1 className="text-3xl text-white font-bold tracking-tight">Se connecter</h1>
+    <div className="grow flex items-center justify-center px-4 py-8">
+      <div className="bg-[#a4f3a6]/95 w-full max-w-sm sm:max-w-md lg:max-w-[25vw] h-fit flex flex-col items-center rounded-2xl backdrop-blur-sm p-6 sm:p-8 shadow-2xl border border-white/20">
+        <div className="flex flex-col gap-y-6 sm:gap-y-8 text-center w-full">
+          <h1 className="text-2xl sm:text-3xl text-white font-bold tracking-tight">Se connecter</h1>
 
           <div className="w-full">
-            <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-6 w-full">
+            <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-5 w-full">
               {/* Message d'erreur */}
               {error && (
                 <div className="bg-red-500/20 border border-red-400 text-red-100 text-sm rounded-xl px-4 py-2">
@@ -54,7 +54,7 @@ function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black"
+                  className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black text-base"
                 />
               </div>
 
@@ -70,7 +70,7 @@ function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black"
+                  className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black text-base"
                 />
               </div>
 
@@ -84,7 +84,7 @@ function Login() {
               </div>
             </form>
 
-            <p className="pt-6 text-black/70 text-sm">
+            <p className="pt-5 text-black/70 text-sm">
               Vous n'avez pas de compte ?{' '}
               <Link to="/signup" className="text-white font-bold hover:underline transition-all">
                 Inscrivez-vous

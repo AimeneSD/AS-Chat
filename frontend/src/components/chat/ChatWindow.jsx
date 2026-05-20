@@ -13,11 +13,24 @@ import MessageInput from './MessageInput';
 /**
  * Sous-composant pour l'en-tête du chat
  */
-function ChatHeader({ friend, isTyping }) {
+function ChatHeader({ friend, isTyping, onBack }) {
   return (
-    <div className="shrink-0 h-16 bg-[#162516] border-b border-white/5 flex items-center px-6 gap-4">
+    <div className="shrink-0 h-14 sm:h-16 bg-[#162516] border-b border-white/5 flex items-center px-3 sm:px-6 gap-3 sm:gap-4">
+      {/* Bouton retour — visible uniquement sur mobile */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+          title="Retour"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
       <div className="relative">
-        <div className="w-10 h-10 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-linear-to-br from-green-400 to-emerald-600 flex items-center justify-center font-bold text-white text-sm shadow-lg">
           {friend.avatar_url
             ? <img src={friend.avatar_url} alt={friend.username} className="w-full h-full rounded-full object-cover" />
             : friend.username?.[0]?.toUpperCase()
@@ -40,6 +53,7 @@ function ChatHeader({ friend, isTyping }) {
 
 /**
  * Sous-composant pour l'état vide (aucun ami sélectionné)
+ * — Affiché uniquement sur desktop (md+), la sidebar prend tout l'écran sur mobile.
  */
 function EmptyChatState() {
   return (
@@ -57,7 +71,7 @@ function EmptyChatState() {
   );
 }
 
-function ChatWindow({ currentUser, friend }) {
+function ChatWindow({ currentUser, friend, onBack }) {
   const [messages, setMessages]         = useState([]);
   const [isTyping, setIsTyping]         = useState(false);
   const [loadingMsgs, setLoadingMsgs]   = useState(false);
@@ -145,8 +159,8 @@ function ChatWindow({ currentUser, friend }) {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#162014]">
-      <ChatHeader friend={friend} isTyping={isTyping} />
+    <div className="flex-1 flex flex-col h-full bg-[#162014] min-w-0">
+      <ChatHeader friend={friend} isTyping={isTyping} onBack={onBack} />
       <MessageList
         messages={messages}
         currentUserId={currentUser?.id}

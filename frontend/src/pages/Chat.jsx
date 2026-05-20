@@ -8,12 +8,14 @@ import SettingsModal from '../components/settings/SettingsModal';
 
 function Chat() {
   const { user, logout } = useAuth();
-  const [isSettingsOpen,setIsSettingsOpen] = useState(false);
-  const [friends, setFriends]                   = useState([]);
-  const [pendingRequests, setPendingRequests]   = useState([]);
-  const [selectedFriend, setSelectedFriend]     = useState(null);
-  const [sidebarMode, setSidebarMode]           = useState('conversations');
-  const [searchQuery, setSearchQuery]           = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [friends, setFriends]               = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [sidebarMode, setSidebarMode]       = useState('conversations');
+  const [searchQuery, setSearchQuery]       = useState('');
+  // Mobile : true = afficher le chat, false = afficher la sidebar
+  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
 
   const loadFriends = useCallback(async () => {
     try {
@@ -33,15 +35,12 @@ function Chat() {
     }
   }, []);
 
-  // Recharge amis + demandes en attente
   const refreshAll = useCallback(() => {
     loadFriends();
     loadPending();
   }, [loadFriends, loadPending]);
 
   useEffect(() => {
-    // On met les appels dans la boucle d'événements (microtask)
-    // pour que le linter ne les considère pas comme des appels synchrones directs.
     Promise.resolve().then(() => {
       loadFriends();
       loadPending();
@@ -61,6 +60,16 @@ function Chat() {
     f.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleSelectFriend = (friend) => {
+    setSelectedFriend(friend);
+    setSearchQuery('');
+    setShowChatOnMobile(true); // Sur mobile : basculer vers la vue chat
+  };
+
+  const handleBackToSidebar = () => {
+    setShowChatOnMobile(false);
+  };
+
   return (
     <SocketProvider
       currentUserId={user?.id}
@@ -68,34 +77,47 @@ function Chat() {
       onFriendStatusChange={handleFriendStatusChange}
     >
       <div className="fixed inset-0 flex bg-[#0d1117]">
-        <Sidebar
-          user={user}
-          friends={filteredFriends}
-          pendingRequests={pendingRequests}
-          selectedFriend={selectedFriend}
-          onSelectFriend={(friend) => {
-            setSelectedFriend(friend);
-            setSearchQuery('');
-          }}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          sidebarMode={sidebarMode}
-          onSidebarModeChange={setSidebarMode}
-          onLogout={logout}
-          onFriendAdded={refreshAll}
-          onOpenSettings={()=>setIsSettingsOpen(!isSettingsOpen)}
-        />
+
+        {/* Sidebar — plein écran sur mobile (cachée si un ami est sélectionné), fixe sur md+ */}
+        <div className={`
+          ${showChatOnMobile ? 'hidden' : 'flex'} md:flex
+          w-full md:w-80 shrink-0 h-full
+        `}>
+          <Sidebar
+            user={user}
+            friends={filteredFriends}
+            pendingRequests={pendingRequests}
+            selectedFriend={selectedFriend}
+            onSelectFriend={handleSelectFriend}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            sidebarMode={sidebarMode}
+            onSidebarModeChange={setSidebarMode}
+            onLogout={logout}
+            onFriendAdded={refreshAll}
+            onOpenSettings={() => setIsSettingsOpen(!isSettingsOpen)}
+          />
+        </div>
+
         <SettingsModal
           isOpen={isSettingsOpen}
-          onClose={()=>setIsSettingsOpen(!isSettingsOpen)}
+          onClose={() => setIsSettingsOpen(!isSettingsOpen)}
           user={user}
         />
 
-        <ChatWindow
-          currentUser={user}
-          friend={selectedFriend}
-          onFriendAdded={refreshAll}
-        />
+        {/* ChatWindow — plein écran sur mobile (cachée par défaut), flex-1 sur md+ */}
+        <div className={`
+          ${showChatOnMobile ? 'flex' : 'hidden'} md:flex
+          flex-1 flex-col h-full
+        `}>
+          <ChatWindow
+            currentUser={user}
+            friend={selectedFriend}
+            onFriendAdded={refreshAll}
+            onBack={handleBackToSidebar}
+          />
+        </div>
+
       </div>
     </SocketProvider>
   );

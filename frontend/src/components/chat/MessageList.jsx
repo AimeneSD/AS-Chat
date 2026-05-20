@@ -38,7 +38,7 @@ function MessageTimestamp({ show, isMine, timeStr, showReadReceipt, showSentRece
 }
 
 function getBubbleClasses(isMine, isFirstOfGroup, isLastOfGroup, isDeleted) {
-  const base = "max-w-[65%] px-4 py-2.5 text-sm leading-relaxed wrap-break-word transition-all duration-200";
+  const base = "max-w-[85%] sm:max-w-[70%] md:max-w-[65%] px-3 sm:px-4 py-2 sm:py-2.5 text-sm leading-relaxed wrap-break-word transition-all duration-200";
   const opacity = isDeleted ? "italic opacity-40" : "";
   
   if (isMine) {
@@ -175,7 +175,7 @@ function MessageList({ messages, currentUserId, loading, allRead }) {
   const processedMessages = processMessageMetadata(messages, currentUserId, allRead, formatDateLabel);
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-0.5 flex flex-col">
+    <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-0.5 flex flex-col">
       {processedMessages.map(({ msg, ...meta }) => (
         <MessageItem
           key={msg.id}

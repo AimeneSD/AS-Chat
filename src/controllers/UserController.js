@@ -127,6 +127,21 @@ const UserController = {
         const users = await User.search(query.trim(), req.user.id);
         return res.status(200).json(users);
     },
+
+    /**
+     * DELETE /api/users/me
+     * Supprime le compte de l'utilisateur.
+     */
+    deleteAccount: async (req, res) => {
+        try {
+            await User.deleteAccount(req.user.id);
+            res.clearCookie('token');
+            return res.status(200).json({ message: 'Compte supprimé avec succès.' });
+        } catch (error) {
+            console.error('[DeleteAccount Error]', error);
+            return res.status(500).json({ error: 'Erreur lors de la suppression du compte.' });
+        }
+    },
 };
 
 module.exports = UserController;

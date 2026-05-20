@@ -164,6 +164,14 @@ class User {
         const sql = `UPDATE users SET password = ? WHERE id = ?`;
         await db.execute(sql, [hashedPassword, userId]);
     }
+
+    /**
+     * Supprime le compte d'un utilisateur
+     */
+    static async deleteAccount(userId) {
+        const sql = `DELETE FROM users WHERE id = ?`;
+        await db.execute(sql, [userId]);
+    }
 }
 
 module.exports = User;

@@ -11,5 +11,6 @@ router.get('/:id',    UserController.getProfile);
 
 // Nouvelles routes pour les paramètres de compte
 router.patch('/password',            UserController.updatePassword);
+router.delete('/me',                 UserController.deleteAccount);
 
 module.exports = router;

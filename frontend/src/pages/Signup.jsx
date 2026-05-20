@@ -28,7 +28,7 @@ function Signup() {
 
     try {
       await register(username, email, password);
-      navigate('/chat'); // Redirection vers le chat après inscription
+      navigate('/chat');
     } catch (err) {
       setError(err.response?.data?.error || 'Une erreur est survenue.');
     } finally {
@@ -37,12 +37,12 @@ function Signup() {
   };
 
   return (
-    <div className="grow flex items-center justify-center">
-      <div className="bg-[#a4f3a6]/95 lg:w-[25vw] w-[85vw] h-fit flex flex-col items-center rounded-2xl backdrop-blur-sm p-8 shadow-2xl border border-white/20">
-        <div className="flex flex-col gap-y-6 text-center w-full">
-          <h1 className="text-3xl text-white font-bold tracking-tight">Créer un compte</h1>
+    <div className="grow flex items-center justify-center px-4 py-8">
+      <div className="bg-[#a4f3a6]/95 w-full max-w-sm sm:max-w-md lg:max-w-[25vw] h-fit flex flex-col items-center rounded-2xl backdrop-blur-sm p-6 sm:p-8 shadow-2xl border border-white/20">
+        <div className="flex flex-col gap-y-5 text-center w-full">
+          <h1 className="text-2xl sm:text-3xl text-white font-bold tracking-tight">Créer un compte</h1>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full">
             {/* Message d'erreur */}
             {error && (
               <div className="bg-red-500/20 border border-red-400 text-red-100 text-sm rounded-xl px-4 py-2">
@@ -62,7 +62,7 @@ function Signup() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black"
+                className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black text-base"
               />
             </div>
 
@@ -78,7 +78,7 @@ function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black"
+                className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black text-base"
               />
             </div>
 
@@ -94,7 +94,7 @@ function Signup() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black"
+                className="border-0 bg-white/40 backdrop-blur-md p-3 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all placeholder:text-black/40 text-black text-base"
               />
             </div>
 
@@ -103,16 +103,16 @@ function Signup() {
               <label className="text-black/80 font-semibold text-sm ml-1">
                 Date de naissance <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-3">
-                <select className="flex-1 bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
+              <div className="flex gap-2">
+                <select className="flex-1 bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none text-sm">
                   <option value="" disabled defaultValue>Jour</option>
                   {days.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
-                <select className="flex-2 bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
+                <select className="flex-[2] bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none text-sm">
                   <option value="" disabled defaultValue>Mois</option>
                   {months.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
                 </select>
-                <select className="flex-[1.5] bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none">
+                <select className="flex-[1.5] bg-[#4c7a48] text-gray-300 p-3 rounded-lg border-0 outline-none cursor-pointer hover:bg-[#3c683a] transition-colors appearance-none text-sm">
                   <option value="" disabled defaultValue>Année</option>
                   {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>

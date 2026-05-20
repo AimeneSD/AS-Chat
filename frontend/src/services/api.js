@@ -39,6 +39,7 @@ export const userService = {
     getProfile:         (userId) => api.get(`/users/${userId}`),
     updateProfile:      (data)   => api.patch('/users/me', data),
     updatePassword:     (data)   => api.patch('/users/password', data),
+    deleteAccount:      ()       => api.delete('/users/me'),
 };
 
 // ─── Services Messages ────────────────────────────────────────────────────────

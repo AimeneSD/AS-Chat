@@ -4,6 +4,8 @@
 - **CSRF(Cross-site Request Forgery)** : Attaque qui consiste à exploiter la confiance d'un site web envers l'utilisateur pour effectuer des actions non désirées. **Mis en place avec un middleware authMiddleware.js**
 - **Stockage JWT** : Ne jamais stocker un JWT dans le localStorage car un attaquant peut exploiter une faille XSS pour voler le token et procéder par une attaque CSRF. Le stocker impérativement dans des cookies HTTP-only et secure.
 - **Usage de chiffrement BCrypt** : Utilisation de l'algorithme de chiffrement BCrypt pour sécuriser les mots de passe des utilisateurs et empêcher les attaquants de faire des attaques par force brute ou par dictionnaire ou rainbow table(Ajout d'un salt aléatoire à chaque mot de passe).
+- **Access Token** : Un token qui permet d'accéder à des ressources protégées. Il est généralement à courte durée de vie (15-30 minutes) et est stocké dans un cookie HTTP-only et secure. 
+- **Refresh Token** : Un token qui permet de renouveler l'access token. Il est généralement à longue durée de vie (7 jours) et est stocké dans un cookie HTTP-only et secure.
 - **SPA (Single Page Application)** : une application web qui se charge une seule fois et met à jour dynamiquement le contenu sans recharger la page **mis en place avec React Router**.
 - **Server-side rendering (SSR)** : le rendu coté serveur (SSR) consiste à générer la page html sur le serveur au lieu du navigateur du client (à faire avec Next.js).
 - **Static-site generation (SSG)** : la génération de site statique consiste à générer la page html sur le serveur au lieu du navigateur du client (à faire avec Next.js).

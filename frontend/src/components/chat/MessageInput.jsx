@@ -44,8 +44,8 @@ function MessageInput({ onSend, onTyping, disabled }) {
   const isNearLimit = remaining < 200;
 
   return (
-    <div className="shrink-0  bg-[#162516] border-t border-white/5 px-4 py-3">
-      <div className="flex items-center gap-3 bg-[#131b11] rounded-[0.5rem] border border-white/8 px-4 py-1 focus-within:border-green-500/40 transition-colors">
+    <div className="shrink-0 bg-[#162516] border-t border-white/5 px-3 sm:px-4 py-3">
+      <div className="flex items-center gap-2 sm:gap-3 bg-[#131b11] rounded-lg border border-white/8 px-3 sm:px-4 py-1 focus-within:border-green-500/40 transition-colors">
         {/* Textarea auto-resize */}
         <textarea
           ref={textareaRef}
@@ -53,9 +53,9 @@ function MessageInput({ onSend, onTyping, disabled }) {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder="Écrivez un message... (Entrée pour envoyer)"
+          placeholder="Écrivez un message..."
           rows={1}
-          className="flex-1 bg-transparent text-white/90 placeholder:text-white/25 text-sm outline-none resize-none  max-h-full h-full disabled:opacity-40"
+          className="flex-1 bg-transparent text-white/90 placeholder:text-white/25 text-sm outline-none resize-none max-h-full h-full disabled:opacity-40"
         />
 
         {/* Compteur de caractères (visible seulement proche de la limite) */}
@@ -77,8 +77,8 @@ function MessageInput({ onSend, onTyping, disabled }) {
         </button>
       </div>
 
-      {/* Indications */}
-      <p className="text-white/15 text-[10px] mt-1.5 ml-1">
+      {/* Indications — cachées sur mobile */}
+      <p className="hidden sm:block text-white/15 text-[10px] mt-1.5 ml-1">
         Entrée pour envoyer · Shift+Entrée pour un saut de ligne
       </p>
     </div>
